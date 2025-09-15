@@ -1,15 +1,15 @@
 
 import { Toaster } from 'react-hot-toast'
 import toast from 'react-hot-toast' 
-import SearchBar from '../SearchBar/SearchBar'
+import SearchBar from '../SearchBox/SearchBox'
 import css from './App.module.css';
 import { useState, useEffect } from 'react'
-import MovieGrid from '../MovieGrid/MovieGrid'
-import type { Movie } from '../../types/movie'
-import { fetchMovies } from '../../services/movieService'
-import MovieModal from '../MovieModal/MovieModal'
-import Loader from '../Loader/Loader'
-import ErrorMessage from '../ErrorMessage/ErrorMessage'
+import MovieGrid from '../NoteList/NoteList'
+import type { Movie } from '../../types/note'
+import { fetchMovies } from '../../services/noteService'
+import MovieModal from '../Modal/Modal'
+import Loader from '../NoteForm/NoteForm'
+import ErrorMessage from '../Pagination/Pagination'
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import ReactPaginate from 'react-paginate'
 
