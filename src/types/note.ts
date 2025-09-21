@@ -1,22 +1,10 @@
 export interface Note {
-    id: number;
-    poster_path: string;
-    backdrop_path: string;
+    id: string;
     title: string;
-    overview: string;
-    release_date: string;
-    vote_average: number;
-    total_pages: number;
-}
-
-export interface NoteTag {
-    id: number;
-    noteId: number;
-    name: string;
+    content: string;
     createdAt: string;
     updatedAt: string;
-    color: string;
-    description: string;
-    category: string;
-    icon: string;
-    isPublic: boolean;}
+    tag: NoteTag;
+}
+
+export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';

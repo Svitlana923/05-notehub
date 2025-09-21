@@ -1,35 +1,52 @@
 import axios from "axios";
 import type { Note } from "../types/note";
 
-
 interface FetchNotesResponse {
-  results: Note[];
-  total_pages: number;
+  notes: Note[];
+  totalPages: number;
 }
-
 
 export const fetchNotes = async (
   query: string,
   page: number
-): Promise<MoviesHttpResponse> => {
-  const response = await axios.get<MoviesHttpResponse>(
-`${import.meta.env.VITE_TMDB_BASE_URL}/search/movie`,
+): Promise<FetchNotesResponse> => {
+  const params: Record<string, string | number> = {
+    search: query,
+    page,
+    perPage: 12,
+  };
+  const response = await axios.get<FetchNotesResponse>(
+    `${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes`,
     {
-      params: { query, page },
+      params,
       headers: {
         accept: "application/json",
-        Authorization: `Bearer ${import.meta.env.VITE_TMDB_TOKEN}`,
+        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
       },
     }
   );
   return response.data;
 };
 
-export const createNote = async (note: Omit<Note, 'id'>): Promise<Note> => {
+export const createNote = async (note: Omit<Note, "id">): Promise<Note> => {
   const response = await axios.post<Note>(
-    `${import.meta.env.VITE_API_BASE_URL}/notes`,)
-}
+    `${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes`,
+    note,
+    {
+      headers: {
+        accept: "application/json",
+        Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+      },
+    }
+  );
+  return response.data;
+};
 
-export const deleteNote = async (id: number): Promise<void> => {
-  await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/notes/${id}`);
-} 
+export const deleteNote = async (id: string): Promise<void> => {
+  await axios.delete(`${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes/${id}`, {
+    headers: {
+      accept: "application/json",
+      Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+    },
+  });
+};

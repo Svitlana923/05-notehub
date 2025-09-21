@@ -1,30 +1,28 @@
-import css from './MovieGrid.module.css'
-import type { Movie } from '../../types/note';
+import css from './NoteList.module.css'
+import type { Note } from '../../types/note';
 
-interface MovieGridProps {
-  movies: Movie[];
-  onSelect: (movie: Movie) => void;
+interface NoteListProps {
+  notes: Note[];
+  onSelect: (note: Note) => void;
 }
 
-export default function MovieGrid({ movies,  onSelect }: MovieGridProps) {
+export default function NoteList({ notes,  onSelect }: NoteListProps) {
   return (
-    <div>
-      <ul className={css.grid}>
-        {movies.map((item) => (
-          <li key={item.id}>
-            <div className={css.card}>
-              <img
-                className={css.image}
-                src={`${import.meta.env.VITE_TMDB_IMAGE_BASE_URL}${item.poster_path}`}
-                alt={item.title}
-                loading="lazy"
-                onClick={() => onSelect(item)}
-              />
-              <h2 className={css.title}>{item.title}</h2>
-            </div>
-          </li>
-        ))}
-      </ul>
+
+    <ul className={css.list}>
+       {notes.map((note) => (
+         <li key={note.id} className={css.listItem}
+          onClick={() => onSelect(note)}
+         >
+    <h2 className={css.title}>{note.title}</h2>
+    <p className={css.content}>{note.content}</p>
+    <div className={css.footer}>
+      <span className={css.tag}>{note.tag}</span>
+             <button type="button" className={css.button}>Delete</button>
     </div>
+  </li>
+
+        ))}
+</ul>
   );
 }

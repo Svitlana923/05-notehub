@@ -1,42 +1,43 @@
 
-import { Toaster } from 'react-hot-toast'
-import toast from 'react-hot-toast' 
-import SearchBar from '../SearchBox/SearchBox'
+import { Toaster, toast } from 'react-hot-toast'
+import SearchBox from '../SearchBox/SearchBox'
 import css from './App.module.css';
 import { useState, useEffect } from 'react'
-import MovieGrid from '../NoteList/NoteList'
-import type { Movie } from '../../types/note'
-import { fetchMovies } from '../../services/noteService'
-import MovieModal from '../Modal/Modal'
-import Loader from '../NoteForm/NoteForm'
-import ErrorMessage from '../Pagination/Pagination'
+import NoteList from '../NoteList/NoteList'
+import type { Note } from '../../types/note'
+import { fetchNotes } from '../../services/noteService'
+import NoteModal from '../NoteModal/NoteModal'
+import Loader from '../Loader/Loader'
+import ErrorMessage from '../ErrorMessage/ErrorMessage'
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import ReactPaginate from 'react-paginate'
+import Pagination from '../Pagination/Pagination';
+import { useMutation } from '@tanstack/react-query';
 
 
 function App() {
   const [query, setQuery] = useState<string>('');
 
-  const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
   
   const [currentPage, setCurrentPage] = useState(1);
 
   const { data, isLoading, isError, isSuccess, isFetched} = useQuery({
-    queryKey: ['movies', query, currentPage],
-    queryFn: () => fetchMovies(query, currentPage),
-    enabled: query !== '',
+    queryKey: ['notes', query, currentPage],
+    queryFn: () => fetchNotes(query, currentPage),
+    //enabled: query !== '',
+    enabled: true,
     placeholderData: keepPreviousData,
   });
 
-  const movies = data?.results ?? [];
-  const totalPages = data?.total_pages ?? 0;
+  const notes = data?.notes ?? [];
+  const totalPages = data?.totalPages ?? 0;
   
-  const openModal = (movie: Movie) => {
-    setSelectedMovie(movie);
+  const openModal = (note: Note) => {
+    setSelectedNote(note);
   }
 
   const closeModal = () => {
-    setSelectedMovie(null);
+    setSelectedNote(null);
   }
   
   const handleSearch = (topic: string) => {
@@ -44,41 +45,43 @@ function App() {
     setCurrentPage(1);
   };
 
+  const handleCreate = () => {
+  setSelectedNote({ id: '', title: '', content: '' });
+  };
+  
   useEffect(() => {
-    if (isFetched && isSuccess && movies.length === 0 && query) {
-      toast.error("No movies found for your request.");
+    if (isFetched && isSuccess && notes.length === 0 && query) {
+      toast.error("No notes found for your request.");
     }
-  }, [isFetched, isSuccess, movies.length, query]);
+  }, [isFetched, isSuccess, notes.length, query]);
 
-  return (
-    <>
-      <SearchBar onSubmit={handleSearch} />
-        
-      {isLoading && <Loader />}
-      {isError && <ErrorMessage />}
-
-      {!isLoading && !isError && movies.length > 0 && 
-      (<>
-        <ReactPaginate
-            pageCount={totalPages}
-            onPageChange={({ selected }) => setCurrentPage(selected + 1)}
-            forcePage={currentPage - 1}
-            marginPagesDisplayed={1}
-            pageRangeDisplayed={5}
-            containerClassName={css.pagination}
-            activeClassName={css.active}
-            nextLabel="→"
-            previousLabel="←"
+ return (
+  <>
+    <div className={css.header}>
+      <SearchBox onChange={handleSearch} />
+      {totalPages > 1 && (
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
         />
-        <MovieGrid movies={movies} onSelect={openModal} />
-  </>
-)}
-      {selectedMovie && (
-        < MovieModal onClose={closeModal} movie={selectedMovie} />
       )}
-      <Toaster position="top-center" reverseOrder={false} />
-    </>
-  )
+      <button className={css.button} onClick={handleCreate}>
+        Create note +
+      </button>
+    </div>
+
+    {isLoading && <Loader />}
+    {isError && <ErrorMessage />}
+
+    {!isLoading && !isError && notes.length > 0 && (
+      <NoteList notes={notes} onSelect={openModal} />
+    )}
+
+    {selectedNote && <NoteModal onClose={closeModal} note={selectedNote} />}
+    <Toaster position="top-center" reverseOrder={false} />
+  </>
+)
 }
 
 export default App

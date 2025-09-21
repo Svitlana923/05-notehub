@@ -1,8 +1,25 @@
-import css from './ErrorMessage.module.css';
+import ReactPaginate from 'react-paginate';
+import css from './Pagination.module.css';
 
-const ErrorMessage = () => {
-  return <div><p className={css.text}>There was an error, please try again...</p>
-</div>;
+interface PaginationProps {
+  totalPages: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
+} 
+
+const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
+  return (
+    <ReactPaginate
+      pageCount={totalPages}
+      onPageChange={(event) => onPageChange(event.selected + 1)}
+      forcePage={currentPage - 1}
+      marginPagesDisplayed={1}
+      pageRangeDisplayed={5}
+      containerClassName={css.pagination}
+      activeClassName={css.active}
+      nextLabel="→"
+      previousLabel="←"
+    />
+  )
 }
-
-export default ErrorMessage;
+export default Pagination;
