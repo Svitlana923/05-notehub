@@ -1,17 +1,15 @@
 import css from './NoteModal.module.css'
 import { createPortal } from "react-dom";
 import { useEffect } from 'react';
-import type { Note } from '../../types/note'
+import NoteForm from '../NoteForm/NoteForm';
 
 interface NoteModalProps {
     onClose: () => void;
-    note: Note | null;
     }
 
 
-export default function NoteModal({ onClose, note }: NoteModalProps) {
- if (!note) return null;
-    
+export default function NoteModal({ onClose }: NoteModalProps) {
+ 
     useEffect(() => {
 	  const handleKeyDown = (e: KeyboardEvent) => {
 	    if (e.key === "Escape") {
@@ -48,11 +46,10 @@ export default function NoteModal({ onClose, note }: NoteModalProps) {
                 &times;
             </button>
             <div className={css.content}>
-                <h2>{note.title}</h2>
-                <p>{note.content}</p>
-                <p><strong>Tag:</strong> {note.tag}</p>
+                <NoteForm onCancel={onClose}/>
                     </div>
                 </div>
             </div>,
-        document.body);
+        document.body
+    );
 }

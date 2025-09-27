@@ -12,6 +12,7 @@ import ErrorMessage from '../ErrorMessage/ErrorMessage'
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import Pagination from '../Pagination/Pagination';
 import { useMutation } from '@tanstack/react-query';
+import { useDebounce} from 'use-debounce';
 
 
 function App() {
@@ -21,10 +22,12 @@ function App() {
   
   const [currentPage, setCurrentPage] = useState(1);
 
+
+  const [debouncedQuery] = useDebounce(query, 1000);
+
   const { data, isLoading, isError, isSuccess, isFetched} = useQuery({
-    queryKey: ['notes', query, currentPage],
-    queryFn: () => fetchNotes(query, currentPage),
-    //enabled: query !== '',
+    queryKey: ['notes', debouncedQuery, currentPage],
+    queryFn: () => fetchNotes(debouncedQuery, currentPage),
     enabled: true,
     placeholderData: keepPreviousData,
   });
@@ -35,7 +38,8 @@ function App() {
   const openModal = (note: Note) => {
     setSelectedNote(note);
   }
-
+ const [isModalOpen, setIsModalOpen] = useState(false);
+  
   const closeModal = () => {
     setSelectedNote(null);
   }
@@ -50,10 +54,10 @@ function App() {
   };
   
   useEffect(() => {
-    if (isFetched && isSuccess && notes.length === 0 && query) {
+    if (isFetched && isSuccess && notes.length === 0 && debouncedQuery) {
       toast.error("No notes found for your request.");
     }
-  }, [isFetched, isSuccess, notes.length, query]);
+  }, [isFetched, isSuccess, notes.length, debouncedQuery]);
 
  return (
   <>
@@ -66,7 +70,10 @@ function App() {
           onPageChange={setCurrentPage}
         />
       )}
-      <button className={css.button} onClick={handleCreate}>
+       <button onClick={() => setIsModalOpen(true)}
+         className={css.button}
+       //onClick={handleCreate}
+       >
         Create note +
       </button>
     </div>
@@ -78,8 +85,9 @@ function App() {
       <NoteList notes={notes} onSelect={openModal} />
     )}
 
-    {selectedNote && <NoteModal onClose={closeModal} note={selectedNote} />}
-    <Toaster position="top-center" reverseOrder={false} />
+  {isModalOpen && <NoteModal onClose={() => setIsModalOpen(false)} />}
+  <Toaster position="top-center" reverseOrder={false} />
+    
   </>
 )
 }
