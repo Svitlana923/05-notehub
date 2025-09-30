@@ -1,7 +1,9 @@
 import css from './NoteForm.module.css';
-import { Formik, Form, Field, ErrorMessage, FormikHelpers } from "formik";
+import { Formik, Form, Field, ErrorMessage} from "formik";
 import { useId } from "react";
 import * as Yup from "yup"; 
+import { useMutation, useQueryClient } from "@tanstack/react-query"; 
+import axios from "axios";
 
 interface NoteFormProps {
   onCancel: () => void;
@@ -33,15 +35,37 @@ const NoteFormSchema = Yup.object().shape({
 export default function NoteForm({ onCancel }: NoteFormProps) {
   const fieldId = useId();
 
-   const handleSubmit = (
+    
+const queryClient = useQueryClient();
+const mutation = useMutation({
+  mutationFn: async (newNote: NoteFormValues) => {
+    const res = await axios.post(
+      `${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes`,
+      newNote,
+      {
+        headers: {
+          Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+        },
+      }
+    );
+    return res.data;
+  },
+  onSuccess: () => {
+    queryClient.invalidateQueries({ queryKey: ["notes"] });
+  },
+});
+
+  const handleSubmit = (
     values: NoteFormValues,
     actions: FormikHelpers<NoteFormValues>
   ) => {
-    console.log("Note data:", values);
-     actions.resetForm();
-     onCancel(); 
+    mutation.mutate(values, {
+      onSuccess: () => {
+        actions.resetForm();
+        onCancel();
+      },
+    });
   };
-
   return (
     <Formik
       initialValues={initialValues}

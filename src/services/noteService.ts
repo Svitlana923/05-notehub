@@ -28,6 +28,8 @@ export const fetchNotes = async (
   return response.data;
 };
 
+
+
 export const createNote = async (note: Omit<Note, "id">): Promise<Note> => {
   const response = await axios.post<Note>(
     `${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes`,
@@ -42,11 +44,14 @@ export const createNote = async (note: Omit<Note, "id">): Promise<Note> => {
   return response.data;
 };
 
-export const deleteNote = async (id: string): Promise<void> => {
-  await axios.delete(`${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes/${id}`, {
+const BASE_URL = import.meta.env.VITE_NOTEHUB_BASE_URL;
+const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
+
+export const deleteNote = async (id: string) => {
+  const res = await axios.delete(`${BASE_URL}/notes/${id}`, {
     headers: {
-      accept: "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+      Authorization: `Bearer ${TOKEN}`,
     },
   });
+  return res.data;
 };
