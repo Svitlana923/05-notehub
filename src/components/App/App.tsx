@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react'
 import NoteList from '../NoteList/NoteList'
 import type { Note } from '../../types/note'
 import { fetchNotes } from '../../services/noteService'
-import NoteModal from '../NoteModal/NoteModal'
+import NoteModal from '../Modal/Modal'
 import Loader from '../Loader/Loader'
 import ErrorMessage from '../ErrorMessage/ErrorMessage'
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
