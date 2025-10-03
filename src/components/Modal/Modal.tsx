@@ -1,14 +1,14 @@
 import css from './Modal.module.css'
 import { createPortal } from "react-dom";
 import { useEffect } from 'react';
-import NoteForm from '../NoteForm/NoteForm';
 
 interface NoteModalProps {
     onClose: () => void;
+    children?: React.ReactNode;
     }
 
 
-export default function NoteModal({ onClose }: NoteModalProps) {
+export default function NoteModal({ onClose, children }: NoteModalProps) {
  
     useEffect(() => {
 	  const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,8 +45,8 @@ export default function NoteModal({ onClose }: NoteModalProps) {
                 aria-label="Close modal">
                 &times;
             </button>
-            <div className={css.content}>
-                <NoteForm onCancel={onClose}/>
+                <div className={css.content}>
+                    {children}
                     </div>
                 </div>
             </div>,

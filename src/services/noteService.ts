@@ -47,11 +47,10 @@ export const createNote = async (note: Omit<Note, "id">): Promise<Note> => {
 const BASE_URL = import.meta.env.VITE_NOTEHUB_BASE_URL;
 const TOKEN = import.meta.env.VITE_NOTEHUB_TOKEN;
 
-export const deleteNote = async (id: string) => {
-  const res = await axios.delete(`${BASE_URL}/notes/${id}`, {
+export const deleteNote = async (id: string): Promise<void> => {
+  await axios.delete<void>(`${BASE_URL}/notes/${id}`, {
     headers: {
       Authorization: `Bearer ${TOKEN}`,
     },
   });
-  return res.data;
 };

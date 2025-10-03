@@ -1,23 +1,23 @@
-import css from './NoteForm.module.css';
-import { Formik, Form, Field, ErrorMessage} from "formik";
-import type { FormikHelpers } from "formik";
+import css from "./NoteForm.module.css";
+import { Formik, Form, Field, ErrorMessage as FormikError } from "formik";
 import { useId } from "react";
-import * as Yup from "yup"; 
-import { useMutation, useQueryClient } from "@tanstack/react-query"; 
-import axios from "axios";
+import * as Yup from "yup";
 
 interface NoteFormProps {
   onCancel: () => void;
+  onSubmit: (values: { title: string; content: string; tag: string }) => void;
 }
 
 interface NoteFormValues {
-  title: string,
-  content: string,
-  tag: string,
+  title: string;
+  content: string;
+  tag: string;
 }
 
 const initialValues: NoteFormValues = {
-title: "", content: "", tag: "Todo" 
+  title: "",
+  content: "",
+  tag: "Todo",
 };
 
 const NoteFormSchema = Yup.object().shape({
@@ -25,58 +25,31 @@ const NoteFormSchema = Yup.object().shape({
     .min(3, "Title must be at least 3 characters")
     .max(50, "Title is too long")
     .required("Title is required"),
-  content: Yup.string()
-    .max(500, "Content must be no longer then 500 characters"),
+  content: Yup.string().max(
+    500,
+    "Content must be no longer than 500 characters"
+  ),
   tag: Yup.string()
     .oneOf(["Todo", "Work", "Personal", "Meeting", "Shopping"], "Invalid tag")
-    .required("Tag is required"), 
+    .required("Tag is required"),
 });
 
-
-export default function NoteForm({ onCancel }: NoteFormProps) {
+export default function NoteForm({ onCancel, onSubmit }: NoteFormProps) {
   const fieldId = useId();
 
-    
-const queryClient = useQueryClient();
-const mutation = useMutation({
-  mutationFn: async (newNote: NoteFormValues) => {
-    const res = await axios.post(
-      `${import.meta.env.VITE_NOTEHUB_BASE_URL}/notes`,
-      newNote,
-      {
-        headers: {
-          Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
-        },
-      }
-    );
-    return res.data;
-  },
-  onSuccess: () => {
-    queryClient.invalidateQueries({ queryKey: ["notes"] });
-  },
-});
-
-  const handleSubmit = (
-    values: NoteFormValues,
-    actions: FormikHelpers<NoteFormValues>
-  ) => {
-    mutation.mutate(values, {
-      onSuccess: () => {
-        actions.resetForm();
-        onCancel();
-      },
-    });
-  };
   return (
     <Formik
       initialValues={initialValues}
       validationSchema={NoteFormSchema}
-      onSubmit={handleSubmit}
+      onSubmit={(values, { resetForm }) => {
+        onSubmit(values);
+        resetForm();
+      }}
     >
-      {() => (
+      {({ isSubmitting }) => (
         <Form className={css.form}>
           <fieldset>
-
+            {/* Title */}
             <div className={css.formGroup}>
               <label htmlFor={`${fieldId}-title`}>Title</label>
               <Field
@@ -85,9 +58,14 @@ const mutation = useMutation({
                 name="title"
                 className={css.input}
               />
-              <ErrorMessage name="title" component="span" className={css.error} />
+              <FormikError
+                name="title"
+                component="span"
+                className={css.error}
+              />
             </div>
 
+            {/* Content */}
             <div className={css.formGroup}>
               <label htmlFor={`${fieldId}-content`}>Content</label>
               <Field
@@ -97,9 +75,14 @@ const mutation = useMutation({
                 rows={8}
                 className={css.textarea}
               />
-              <ErrorMessage name="content" component="span" className={css.error} />
+              <FormikError
+                name="content"
+                component="span"
+                className={css.error}
+              />
             </div>
 
+            {/* Tag */}
             <div className={css.formGroup}>
               <label htmlFor={`${fieldId}-tag`}>Tag</label>
               <Field
@@ -114,9 +97,14 @@ const mutation = useMutation({
                 <option value="Meeting">Meeting</option>
                 <option value="Shopping">Shopping</option>
               </Field>
-              <ErrorMessage name="tag" component="span" className={css.error} />
+              <FormikError
+                name="tag"
+                component="span"
+                className={css.error}
+              />
             </div>
 
+            {/* Actions */}
             <div className={css.actions}>
               <button
                 type="button"
@@ -128,11 +116,11 @@ const mutation = useMutation({
               <button
                 type="submit"
                 className={css.submitButton}
+                disabled={isSubmitting}
               >
-                Create note
+                {isSubmitting ? "Creating..." : "Create note"}
               </button>
             </div>
-
           </fieldset>
         </Form>
       )}
