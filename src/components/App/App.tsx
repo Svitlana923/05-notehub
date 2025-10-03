@@ -5,7 +5,7 @@ import css from "./App.module.css";
 import { useState, useEffect } from "react";
 import NoteList from "../NoteList/NoteList";
 import type { Note } from "../../types/note";
-import { fetchNotes, deleteNote } from "../../services/noteService";
+import { fetchNotes } from "../../services/noteService";
 import NoteModal from "../Modal/Modal";
 import Loader from "../Loader/Loader";
 import ErrorMessage from "../ErrorMessage/ErrorMessage";
