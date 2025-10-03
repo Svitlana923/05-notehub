@@ -38,7 +38,6 @@ function App() {
 
   const queryClient = useQueryClient();
 
-  // CREATE NOTE
   const createMutation = useMutation({
     mutationFn: async (newNote: { title: string; content: string; tag: string }) => {
       const res = await axios.post(
@@ -56,22 +55,10 @@ function App() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
       toast.success("Note created!");
-      setIsModalOpen(false); // ✅ закриває модалку після успішного створення
+      setIsModalOpen(false);
     },
     onError: () => {
       toast.error("Failed to create note");
-    },
-  });
-
-  // DELETE NOTE
-  const deleteMutation = useMutation({
-    mutationFn: (id: string) => deleteNote(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["notes"] });
-      toast.success("Note deleted!");
-    },
-    onError: () => {
-      toast.error("Failed to delete note");
     },
   });
 
