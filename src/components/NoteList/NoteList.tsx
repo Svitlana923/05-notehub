@@ -1,7 +1,9 @@
-import css from './NoteList.module.css'
-import type { Note } from '../../types/note';
-import { useMutation, useQueryClient } from "@tanstack/react-query"; 
+
+import css from "./NoteList.module.css";
+import type { Note } from "../../types/note";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { deleteNote } from "../../services/noteService";
+import { useState } from "react";
 import { toast } from "react-hot-toast";
 
 interface NoteListProps {
@@ -11,8 +13,9 @@ interface NoteListProps {
 
 export default function NoteList({ notes, onSelect }: NoteListProps) {
   const queryClient = useQueryClient();
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
-  const mutation = useMutation({
+  const deleteMutation = useMutation({
     mutationFn: (id: string) => deleteNote(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["notes"] });
@@ -21,16 +24,15 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
     onError: () => {
       toast.error("Failed to delete note");
     },
+    onSettled: () => {
+      setDeletingId(null);
+    },
   });
 
   return (
     <ul className={css.list}>
       {notes.map((note) => (
-        <li 
-          key={note.id} 
-          className={css.listItem}
-          onClick={() => onSelect?.(note)}
-        >
+        <li key={note.id} className={css.listItem} onClick={() => onSelect?.(note)}>
           <h2 className={css.title}>{note.title}</h2>
           <p className={css.content}>{note.content}</p>
           <div className={css.footer}>
@@ -40,11 +42,12 @@ export default function NoteList({ notes, onSelect }: NoteListProps) {
               className={css.button}
               onClick={(e) => {
                 e.stopPropagation();
-                mutation.mutate(note.id);
+                setDeletingId(note.id);
+                deleteMutation.mutate(note.id);
               }}
-              disabled={mutation.isPending}
+              disabled={deletingId === note.id}
             >
-              {mutation.isPending ? "Deleting..." : "Delete"}
+              {deletingId === note.id ? "Deleting..." : "Delete"}
             </button>
           </div>
         </li>
